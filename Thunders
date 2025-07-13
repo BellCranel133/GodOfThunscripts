@@ -1,1 +1,57 @@
 loadstring(game:HttpGet("https://raw.githubusercontent.com/BellCranel133/Scripts/refs/heads/main/ZuesXhub"))()
+-- LocalScript (place in StarterPlayerScripts or a GUI)
+
+-- Settings
+local eggESPEnabled = true
+local updateInterval = 1 -- seconds
+
+-- Services
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local workspace = game:GetService("Workspace")
+
+-- Function to create floating labels
+local function createBillboard(part, text)
+    local billboard = Instance.new("BillboardGui")
+    billboard.Size = UDim2.new(0, 200, 0, 50)
+    billboard.StudsOffset = Vector3.new(0, 2, 0)
+    billboard.Adornee = part
+    billboard.AlwaysOnTop = true
+    billboard.Name = "EggESP"
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.TextColor3 = Color3.new(1, 1, 0)
+    label.TextScaled = true
+    label.Font = Enum.Font.SourceSansBold
+    label.Text = text
+    label.Parent = billboard
+
+    billboard.Parent = part
+end
+
+-- Main update function
+local function updateEggESP()
+    for _, obj in pairs(workspace:GetDescendants()) do
+        if obj:IsA("Model") and obj:FindFirstChild("EggType") and not obj:FindFirstChild("EggESP") then
+            local eggPart = obj:FindFirstChildWhichIsA("BasePart")
+            if eggPart then
+                local eggType = obj.EggType.Value
+                local nextChange = obj:FindFirstChild("NextChangeTime") and obj.NextChangeTime.Value or "?"
+                local labelText = eggType .. " → Changing in: " .. tostring(nextChange) .. "s"
+                createBillboard(eggPart, labelText)
+            end
+        end
+    end
+end
+
+-- Loop to update ESP
+task.spawn(function()
+    while eggESPEnabled do
+        updateEggESP()
+        task.wait(updateInterval)
+    end
+end)
